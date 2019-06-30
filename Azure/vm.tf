@@ -4,14 +4,9 @@ provider "azurerm" {
   version = "=1.28.0"
 }
 
-# Set HOSTNAME
-variable "prefix" {
-  default = "RAMONES"
-}
-
 resource "azurerm_resource_group" "main" {
     name     = "${var.prefix}-resource"
-    location = "eastus"
+    location = "${var.location}"
 
     tags {
         environment = "Terraform Demo"
@@ -39,7 +34,7 @@ resource "azurerm_subnet" "main" {
     name                 = "mySubnet"
     resource_group_name  = "${azurerm_resource_group.main.name}"
     virtual_network_name = "${azurerm_virtual_network.main.name}"
-    address_prefix       = "10.0.2.0/24"
+    address_prefix       = "${var.ip_address}"
 }
 
 resource "azurerm_public_ip" "main" {
@@ -129,7 +124,7 @@ resource "azurerm_packet_capture" "main" {
 */
 
 resource "azurerm_virtual_machine" "main" {
-  name                  = "${var.prefix}-VM"
+  name                  = "${upper(var.prefix)}-VM"
   location              = "${azurerm_resource_group.main.location}"
   resource_group_name   = "${azurerm_resource_group.main.name}"
   network_interface_ids = ["${azurerm_network_interface.main.id}"]
@@ -156,8 +151,8 @@ resource "azurerm_virtual_machine" "main" {
   }
   os_profile {
     computer_name  = "${var.prefix}"
-    admin_username = "username"
-    admin_password = "password"
+    admin_username = "${var.username}"
+    admin_password = "${var.password}"
   }
   os_profile_linux_config {
     disable_password_authentication = false
