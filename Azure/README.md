@@ -18,11 +18,11 @@ The output (similar to below) will display one or more Subscriptions - with the 
 [
   {
     "cloudName": "AzureCloud",
-    "id": "00000000-0000-0000-0000-000000000000",
+    "id": "00000000-0000-0000-0000-000000000001",
     "isDefault": true,
     "name": "PAYG Subscription",
     "state": "Enabled",
-    "tenantId": "00000000-0000-0000-0000-000000000000",
+    "tenantId": "00000000-0000-0000-0000-000000000123",
     "user": {
       "name": "user@example.com",
       "type": "user"
@@ -34,24 +34,24 @@ The output (similar to below) will display one or more Subscriptions - with the 
 Should you have more than one Subscription, you can specify the Subscription to use via the following command:
 
 ```
-$ az account set --subscription="SUBSCRIPTION_ID"
+$ az account set --subscription="00000000-0000-0000-0000-000000000001"
 ```
 
 We can now create the Service Principal which will have permissions to manage resources in the specified Subscription using the following command:
 
 ```
-$ az ad sp create-for-rbac --role="Contributor" --scopes="/subscriptions/SUBSCRIPTION_ID"
+$ az ad sp create-for-rbac -n "MyTerraform" --role="Contributor" --scopes="/subscriptions/00000000-0000-0000-0000-000000000001"
 ```
 
 This command will output 5 values:
 
 ```
 {
-  "appId": "00000000-0000-0000-0000-000000000000",
-  "displayName": "azure-cli-2017-06-05-10-41-15",
-  "name": "http://azure-cli-2017-06-05-10-41-15",
-  "password": "0000-0000-0000-0000-000000000000",
-  "tenant": "00000000-0000-0000-0000-000000000000"
+  "appId": "00000000-0000-0000-0000-000000000456",
+  "displayName": "MyTerraform",
+  "name": "http://MyTerraform",
+  "password": "0000-0000-0000-0000-000000000789",
+  "tenant": "00000000-0000-0000-0000-000000000123"
 }
 ```
 
