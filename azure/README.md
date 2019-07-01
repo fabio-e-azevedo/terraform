@@ -31,7 +31,7 @@ $ az account list
 ]
 ```
 
-Should you have more than one Subscription, you can specify the Subscription to use via the following command:
+*Should you have more than one Subscription, you can specify the Subscription to use via the following command:*
 
 ```
 $ az account set --subscription="00000000-0000-0000-0000-000000000001"
