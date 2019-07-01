@@ -12,7 +12,7 @@ Once logged in - it's possible to list the Subscriptions associated with the acc
 $ az account list
 ```
 
-The output (similar to below) will display one or more Subscriptions - with the id field being the subscription_id field referenced above.
+*The output (similar to below) will display one or more Subscriptions - with the id field being the subscription_id field referenced above.*
 
 ```
 [
