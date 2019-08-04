@@ -3,6 +3,16 @@ variable "prefix" {
   default = "ramones"
 }
 
+variable "node_count" {
+  type = "string"
+  default = 3
+}
+
+variable "start_number" {
+  default = 3
+}
+
+
 variable "location" {
   type = "string"
   default = "eastus"

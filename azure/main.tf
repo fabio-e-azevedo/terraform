@@ -38,10 +38,11 @@ resource "azurerm_subnet" "main" {
 }
 
 resource "azurerm_public_ip" "main" {
-    name                         = "myPublicIP"
+    name                         = "myPublicIP-${count.index + 1}"
     location                     = "${azurerm_resource_group.main.location}"
     resource_group_name          = "${azurerm_resource_group.main.name}"
     allocation_method            = "Dynamic"
+    count                        = "${var.node_count}"
 
     tags {
         environment = "Terraform Demo"
@@ -72,16 +73,17 @@ resource "azurerm_network_security_group" "main" {
 }
 
 resource "azurerm_network_interface" "main" {
-    name                = "myNIC"
-    location            = "${azurerm_resource_group.main.location}"
-    resource_group_name = "${azurerm_resource_group.main.name}"
+    name                      = "myNIC"
+    location                  = "${azurerm_resource_group.main.location}"
+    resource_group_name       = "${azurerm_resource_group.main.name}"
     network_security_group_id = "${azurerm_network_security_group.main.id}"
+    count                     = "${var.node_count}"
 
     ip_configuration {
         name                          = "myNicConfiguration"
         subnet_id                     = "${azurerm_subnet.main.id}"
         private_ip_address_allocation = "Dynamic"
-        public_ip_address_id          = "${azurerm_public_ip.main.id}"
+        public_ip_address_id          = "${azurerm_public_ip.main.*.id[count.index]}"
     }
 
     depends_on = ["azurerm_network_security_group.main"] 
@@ -94,11 +96,12 @@ resource "azurerm_virtual_machine_extension" "main" {
   name                       = "myNetworkWatcher"
   location                   = "${azurerm_resource_group.main.location}"
   resource_group_name        = "${azurerm_resource_group.main.name}"
-  virtual_machine_name       = "${azurerm_virtual_machine.main.name}"
+  virtual_machine_name       = "${azurerm_virtual_machine.main.*.name[count.index]}"
   publisher                  = "Microsoft.Azure.NetworkWatcher"
   type                       = "NetworkWatcherAgentLinux"
   type_handler_version       = "1.4"
   auto_upgrade_minor_version = true
+  count                      = "${var.node_count}"
 }
 /*
 resource "azurerm_storage_account" "main" {
@@ -124,11 +127,12 @@ resource "azurerm_packet_capture" "main" {
 */
 
 resource "azurerm_virtual_machine" "main" {
-  name                  = "${upper(var.prefix)}-VM"
+  name                  = "${upper(var.prefix)}${format("%02d", (count.index + var.start_number) + 1)}-VM"
   location              = "${azurerm_resource_group.main.location}"
   resource_group_name   = "${azurerm_resource_group.main.name}"
-  network_interface_ids = ["${azurerm_network_interface.main.id}"]
+  network_interface_ids = ["${azurerm_network_interface.main.*.id[count.index]}"]
   vm_size               = "Standard_B1ls"
+  count                 = "${var.node_count}"
 
   # Uncomment this line to delete the OS disk automatically when deleting the VM
   # delete_os_disk_on_termination = true
@@ -144,7 +148,7 @@ resource "azurerm_virtual_machine" "main" {
     version   = "latest"
   }
   storage_os_disk {
-    name              = "myOsDisk1"
+    name              = "myOsDisk1-${var.prefix}-${count.index}"
     caching           = "ReadWrite"
     create_option     = "FromImage"
     managed_disk_type = "Standard_LRS"
