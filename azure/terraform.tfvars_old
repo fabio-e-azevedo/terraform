@@ -1,0 +1,38 @@
+# Resource Group
+rg_count    = "1"
+rg_name     = "rg-azs-lab-cn01"
+rg_location = "local"
+
+# Virtual Network
+vn_count = "1"
+vn_name  = "vn-azs-lab-cn01"
+vn_space = "10.1.0.0/16"
+
+# Subnet
+sn_count    = "1"
+sn_name     = "sn-azs-lab-cn01"
+sn_prefix   = "10.1.1.0/24"
+
+# Public IP
+pip_count = "1"
+pip_name = "pip-azs-lab-cn01"
+pip_allocation = "dynamic"
+
+# Network Security Group
+nsg_count = "1"
+nsg_name  = "nsg-azs-lab-cn01"
+
+# Network Interface
+nic_count      = "1"
+nic_name       = "nic-azs-lab-cn01-01"
+nic_ip_name    = "ipconfig1"
+nic_allocation = "dynamic"
+
+# Storage Account + Virtual Machine
+vm_count         = "1"
+vm_name          = "vm-azs-lab-cn01"
+vm_size          = "Standard_F2s_v2"
+vm_osdisk_name   = "vm-azs-lab-osdisk01"
+vm_datadisk_name = "vm-azs-lab-datadisk01"
+vm_user          = "myUser"
+vm_pwd           = "myPassword"

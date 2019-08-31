@@ -5,13 +5,12 @@ variable "prefix" {
 
 variable "node_count" {
   type = "string"
-  default = 3
+  default = 5
 }
 
 variable "start_number" {
-  default = 3
+  default = 0
 }
-
 
 variable "location" {
   type = "string"
