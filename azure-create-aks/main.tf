@@ -18,7 +18,7 @@ provider "azurerm" {
     resource_group {
       prevent_deletion_if_contains_resources = false
     }
-  } # Obrigatório para o provider Azure
+  }
   skip_provider_registration = true
 }
 
@@ -32,16 +32,16 @@ variable "localizacao" {
 }
 
 # 3. O Resource Group (A "pasta" que agrupa tudo na Azure)
-resource "azurerm_resource_group" "rg" {
+resource "azurerm_resource_group" "this" {
   name     = "${var.prefixo}-resources"
   location = var.localizacao
 }
 
 # 4. O Cluster AKS
-resource "azurerm_kubernetes_cluster" "aks" {
+resource "azurerm_kubernetes_cluster" "this" {
   name                = "${var.prefixo}-aks"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.this.location
+  resource_group_name = azurerm_resource_group.this.name
   dns_prefix          = "${var.prefixo}-k8s"
 
   # Configuração da máquina (Node Pool)
@@ -63,22 +63,29 @@ resource "azurerm_kubernetes_cluster" "aks" {
 
 # 5. Output importante: O comando para conectar no cluster depois
 output "comando_conexao" {
-  value = "az aks get-credentials --resource-group ${azurerm_resource_group.rg.name} --name ${azurerm_kubernetes_cluster.aks.name}"
+  value = "az aks get-credentials --resource-group ${azurerm_resource_group.this.name} --name ${azurerm_kubernetes_cluster.this.name}"
 }
 
 # --- Configuração do Provider Kubernetes ---
 # Ele usa as credenciais do cluster que acabamos de criar para se autenticar
 provider "kubernetes" {
-  host                   = azurerm_kubernetes_cluster.aks.kube_config[0].host
-  client_certificate     = base64decode(azurerm_kubernetes_cluster.aks.kube_config[0].client_certificate)
-  client_key             = base64decode(azurerm_kubernetes_cluster.aks.kube_config[0].client_key)
-  cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.aks.kube_config[0].cluster_ca_certificate)
+  host                   = azurerm_kubernetes_cluster.this.kube_config[0].host
+  client_certificate     = base64decode(azurerm_kubernetes_cluster.this.kube_config[0].client_certificate)
+  client_key             = base64decode(azurerm_kubernetes_cluster.this.kube_config[0].client_key)
+  cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.this.kube_config[0].cluster_ca_certificate)
+}
+
+resource "kubernetes_namespace" "this" {
+  metadata {
+    name = "app-web"
+  }
 }
 
 # --- O Deploy do NGINX ---
-resource "kubernetes_deployment" "nginx" {
+resource "kubernetes_deployment" "this" {
   metadata {
-    name = "nginx-demo"
+    name      = "nginx-demo"
+    namespace = kubernetes_namespace.this.metadata.0.name
   }
 
   spec {
@@ -109,9 +116,10 @@ resource "kubernetes_deployment" "nginx" {
 
 # --- O Serviço (Load Balancer) ---
 # Isso pede para a Azure criar um IP Público para acessarmos o Nginx
-resource "kubernetes_service" "nginx" {
+resource "kubernetes_service" "this" {
   metadata {
-    name = "nginx-service"
+    name      = "nginx-service"
+    namespace = kubernetes_namespace.this.metadata.0.name
   }
   spec {
     selector = {
@@ -127,5 +135,5 @@ resource "kubernetes_service" "nginx" {
 
 # --- Output do IP ---
 output "ip_do_nginx" {
-  value = kubernetes_service.nginx.status.0.load_balancer.0.ingress.0.ip
+  value = kubernetes_service.this.status.0.load_balancer.0.ingress.0.ip
 }
